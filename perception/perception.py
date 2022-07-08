@@ -86,20 +86,6 @@ def run(distanceData, MyCar,right,mid,left):
     """
     
     
-    # multi threads confliction, time delayed 0.3 second
-    # time.sleep(0.3)
-    
-    # img = convert_image_to_numpy_ndarray(data["image"].byte)
-    
-    # # Running object detection model and ditance estimation 
-    # results = detection.driving_runtime(predictor=PerceptionArgs["predictor"], 
-    #                                     image=img, 
-    #                                     args=PerceptionArgs["args"], 
-    #                                     MyCar=MyCar)
-    # result_left  = results[0] 
-    # result_mid   = results[1]
-    # result_right = results[2]
-    
     # When autonomous driving vehicle is running in the left lane, 
     # the left distance will be set to infinity to simplify lane change decision.
     if MyCar.midlane == MyCar.lanestate.LEFT:

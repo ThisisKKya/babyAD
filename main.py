@@ -224,8 +224,9 @@ def main():
                 # 获取车辆速度
                 vehicle_speed = Com_getFloatData(vehicle_info, 'speed[0]')
                 vehicle_heading = Com_getDoubleData(vehicle_info, 'pos[3]')
-                vehicle_roll_speed = Com_getFloatData(vehicle_info, 'speed[5]')
-                Process_OutputLevel("speed = " + str(vehicle_speed), 4)
+                vehicle_yr_speed = Com_getFloatData(vehicle_info, 'speed[4]')
+                # vehicle_yr_speed = Com_getFloatData(vehicle_info, 'speed[5]')
+                # Process_OutputLevel("speed = " + str(vehicle_speed), 4)
                 
                 # 获取车道线信息
                 # lines_number = Com_getShortData(line_info, 'linesNb35m')
@@ -241,16 +242,18 @@ def main():
                 # Process_OutputLevel("right_c0 = {}".format(right_c0), 4)
                 MyCar.speed = vehicle_speed
                 MyCar.cao = vehicle_heading
-                MyCar.yr = vehicle_roll_speed
+                MyCar.yr = vehicle_yr_speed
 
                 x = MyCar.lanefuture
                 left_temp = left_line_coefficient[0] + left_line_coefficient[1]*x + left_line_coefficient[2]*x*x + left_line_coefficient[3]*x*x*x
                 right_temp = right_line_coefficient[0] + right_line_coefficient[1]*x + right_line_coefficient[2]*x*x + right_line_coefficient[3]*x*x*x
                 # Process_OutputLevel("position now = {}".format(MyCar.positionnow), 4)
-                MyCar.positionnow =  left_temp + right_temp
+                MyCar.positionnow =  (left_temp + right_temp) * 1.75 
                 
                 # 有限3种状态任务
                 Process_OutputLevel("Current state: " + MyCar.cardecision, 4)
+                Process_OutputLevel("direction: {}".format(MyCar.direction), 4)
+                Process_OutputLevel("MyCar.lanestate = ({}, {}, {})".format(MyCar.lanestate.LEFT, MyCar.lanestate.MID, MyCar.lanestate.RIGHT), 4)
                 # Com_setDoubleData(cab_interface,VAR_Accelerator,1)
                 # Com_setDoubleData(cab_interface,'AcceleratorMultiplicative', 0)
                 if (MyCar.cardecision == 'overtake'):

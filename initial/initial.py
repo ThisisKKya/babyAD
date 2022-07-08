@@ -39,7 +39,7 @@ class ControlData(object):
         self.overtakelimit = 25              # 超车阶段控制速度
         
         # 横向控制PID参数
-        self.lat_kp = 0.75
+        self.lat_kp = 0.1
         self.lat_ki = 0.02
         self.lat_kd = 0.4
         self.latPid = pid.PID(self.lat_kp, self.lat_ki, self.lat_kd)
@@ -55,7 +55,7 @@ class ControlData(object):
         self.speed_kp = 1.20
         self.speed_ki = 0.02
         self.speed_kd = 0.5
-        self.speedPid = pid.PID(self.speed_kp, 0, self.speed_kp)
+        self.speedPid = pid.PID(self.speed_kp, 0, self.speed_kd)
         self.speedPidThread_1 = 10
         self.speedPidThread_2 = 2
 
@@ -83,7 +83,7 @@ class CarState(object):
         self.direction = 'mid'               # 当前行驶方向
         self.changing = False                # 处于超车状态时为True
         self.midlane = self.lanestate.MID    # 7.5 0 -8 latpid 参考 target
-        self.lanefuture = 2.0                # 车道线 x = 2 处的位置
+        self.lanefuture = 2.5                # 车道线 x = 2 处的位置
         self.saftydistance = 40             # 与前车的安全距离 对于紧密跟车的情况 要准确识别并控速
         self.lastovertakeSum = 0             # 超车计数与数据平滑辅助变量
         self.overtakeSum = 0                 # 超车计数

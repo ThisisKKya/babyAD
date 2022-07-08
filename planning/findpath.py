@@ -17,7 +17,7 @@ def findpath(distance, MyCar):
     # 当前所在车道
     whichlanenow = MyCar.midlane
 
-    # 如果当前在坐车道 overtake只能向右
+    # 如果当前在左车道 overtake只能向右
     if whichlanenow == MyCar.lanestate.LEFT:
         MyCar.direction = 'right'
     elif whichlanenow == MyCar.lanestate.RIGHT:
