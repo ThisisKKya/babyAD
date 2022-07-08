@@ -64,7 +64,7 @@ def convert_image_to_numpy_ndarray(imageframe_byte):
     return numpy.array(Image.open(imageframe_byte))
 
 '''
-def run(perceptionFlag, data, PerceptionArgs, distanceData, MyCar):
+def run(distanceData, MyCar,right,mid,left):
     """
     main function of perception module
     
@@ -85,11 +85,9 @@ def run(perceptionFlag, data, PerceptionArgs, distanceData, MyCar):
         None element
     """
     
-    if not perceptionFlag:
-        return None
     
     # multi threads confliction, time delayed 0.3 second
-    time.sleep(0.3)
+    # time.sleep(0.3)
     
     # img = convert_image_to_numpy_ndarray(data["image"].byte)
     
@@ -107,17 +105,17 @@ def run(perceptionFlag, data, PerceptionArgs, distanceData, MyCar):
     if MyCar.midlane == MyCar.lanestate.LEFT:
         distanceData.set_distance_left(float('inf'))
     else:
-        distanceData.set_distance_left(result_left.item())
+        distanceData.set_distance_left(left)
     
     # When autonomous driving vehicle is running in the right lane,
     # the right distance will be set to infinyty to simplify lane change decision.
     if MyCar.midlane == MyCar.lanestate.RIGHT:
         distanceData.set_distance_right(float('inf'))
     else:
-        distanceData.set_distance_right(result_right.item())
+        distanceData.set_distance_right(right)
     
     # Setting middle distance all the time.
-    distanceData.set_distance_mid(result_mid.item())
+    distanceData.set_distance_mid(mid)
         
 
     return None

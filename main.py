@@ -1,12 +1,12 @@
 import config
 from concurrent.futures import process
 from scaner import *
-from perception.perception import DistanceData
+import perception.perception as perception
 from initial.initial import *
 import planning.decision as planning
 # import control
 #global
-distanceData = DistanceData()
+distanceData = perception.DistanceData()
 # previous_distance =  DistanceData()
 # current_distance = DistanceData()
 MyCar = CarState()
@@ -216,6 +216,11 @@ def main():
                 mid_distance = get_mid_distance(target_traffic_info, target_info)
                 left_distance = get_left_distance(target_traffic_info, target_info)
                 right_distance = get_right_distance(target_traffic_info, target_info)
+                #############################percpetion 
+                perception.run(distanceData,MyCar,right_distance,mid_distance,left_distance)
+
+
+
 
                 #planning
                 planning.run(distanceData, MyCar)
@@ -276,9 +281,9 @@ def main():
                     # print('latsteer is ', Controller.latPid.steer_)
                     latitudeControlpos(MyCar.positionnow, controller.latPid, MyCar)
 
-                    # Com_setDoubleData(cab_interface,VAR_Accelerator,controller.speedPid.thorro_)
-                    Com_setDoubleData(cab_interface,VAR_Accelerator,20)
-                    Com_setDoubleData(cab_interface,VAR_Accelerator,0)
+                    Com_setDoubleData(cab_interface,VAR_Accelerator,controller.speedPid.thorro_)
+                    # Com_setDoubleData(cab_interface,VAR_Accelerator,20)
+                    # Com_setDoubleData(cab_interface,VAR_Accelerator,0)
                     Com_setDoubleData(steer_control,VAR_Steer,controller.latPid.steer_ + 0.01 * controller.yrPid.yrsteer_)
                     Com_setShortData(CabToModel, 'IgnitionKey', 2)
                     Com_setShortData(CabToModel, 'GearBoxAutoMode', 10)

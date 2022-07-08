@@ -90,7 +90,7 @@ class CarState(object):
         self.changing = False                # 处于超车状态时为True
         self.midlane = self.lanestate.MID    # 7.5 0 -8 latpid 参考 target
         self.lanefuture = 2.0                # 车道线 x = 2 处的位置
-        self.saftydistance = 18              # 与前车的安全距离 对于紧密跟车的情况 要准确识别并控速
+        self.saftydistance = 40             # 与前车的安全距离 对于紧密跟车的情况 要准确识别并控速
         self.lastovertakeSum = 0             # 超车计数与数据平滑辅助变量
         self.overtakeSum = 0                 # 超车计数
         self.time = 0                        # 超级加速阶段计时
