@@ -139,9 +139,34 @@ def get_left_distance(target_traffic_info, target_info):
     if target_array_count == 0:
         return float('inf')
 
+    left_distance = float('inf')
     for i in range(target_array_count):
-        pass
+        lane_id = Com_getShortData(target_traffic_info, "targetsArray[{}]/laneId".format(i))
+        if lane_id == -1:
+            temp_distance = Com_getDoubleData(target_info, "targetsArray[{}]/posXInChosenRef".format(i))
+            # Process_OutputLevel("temp_distance = {}".format(temp_distance), 4)
+            if temp_distance > 0 and temp_distance < left_distance:
+                left_distance = temp_distance
+    Process_OutputLevel("left_distance = {}".format(left_distance), 4)
+    return left_distance
 
+# 输入：目标交通信息接口，目标信息接口
+# 输出：右侧车道上最近的车辆的X方向距离(m)，若前方没有车辆，则输出float('inf')
+def get_right_distance(target_traffic_info, target_info):
+    target_array_count = Com_getShortData(target_info, "targetsArrayCount")
+    if target_array_count == 0:
+        return float('inf')
+
+    right_distance = float('inf')
+    for i in range(target_array_count):
+        lane_id = Com_getShortData(target_traffic_info, "targetsArray[{}]/laneId".format(i))
+        if lane_id == 1:
+            temp_distance = Com_getDoubleData(target_info, "targetsArray[{}]/posXInChosenRef".format(i))
+            # Process_OutputLevel("temp_distance = {}".format(temp_distance), 4)
+            if temp_distance > 0 and temp_distance < right_distance:
+                right_distance = temp_distance
+    Process_OutputLevel("right_distance = {}".format(right_distance), 4)
+    return right_distance
 
 def main():
     #######初始化进程########
@@ -189,7 +214,8 @@ def main():
                 Com_updateInputs(UT_AllData)
                 # 计算左中右车道障碍物距离
                 mid_distance = get_mid_distance(target_traffic_info, target_info)
-
+                left_distance = get_left_distance(target_traffic_info, target_info)
+                right_distance = get_right_distance(target_traffic_info, target_info)
 
                 #planning
                 planning.run(distanceData, MyCar)
