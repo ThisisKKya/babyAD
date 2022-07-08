@@ -42,18 +42,12 @@ class ControlData(object):
         self.lat_kp = 0.75
         self.lat_ki = 0.02
         self.lat_kd = 0.4
-        # self.lat_kp = 100
-        # self.lat_ki = 0.02
-        # self.lat_kd = 1
         self.latPid = pid.PID(self.lat_kp, self.lat_ki, self.lat_kd)
         
         # 方向角控制PID参数
-        self.yr_kp = 0.06
-        self.yr_ki = 0.01
-        self.yr_kd = 0.05
-        # self.yr_kp = 100
-        # self.yr_ki = 0.01
-        # self.yr_kd = 0.2     
+        self.yr_kp = 0.37
+        self.yr_ki = 0.024
+        self.yr_kd = 0.032
         self.yrPid = pid.PID(self.yr_kp, self.yr_ki, self.yr_kd)
         
         # 纵向控制PID参数

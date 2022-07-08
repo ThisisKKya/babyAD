@@ -218,10 +218,6 @@ def main():
                 right_distance = get_right_distance(target_traffic_info, target_info)
                 #############################percpetion 
                 perception.run(distanceData,MyCar,right_distance,mid_distance,left_distance)
-
-
-
-
                 #planning
                 planning.run(distanceData, MyCar)
 
@@ -234,15 +230,24 @@ def main():
                 # 获取车道线信息
                 # lines_number = Com_getShortData(line_info, 'linesNb35m')
                 # Process_OutputLevel("lines number = {}".format(lines_number), 4)
-                left_c0 = Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c0'.format(get_left_line_id(line_info)))
-                right_c0 = Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c0'.format(get_right_line_id(line_info)))
+                left_line_coefficient = []
+                right_line_coefficient = []
+                for i in range(4):
+                    left_line_coefficient.append(Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c{}'.format(get_left_line_id(line_info), i)))
+                    right_line_coefficient.append(Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c{}'.format(get_right_line_id(line_info), i)))
+                # left_c0 = Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c0'.format(get_left_line_id(line_info)))
+                # right_c0 = Com_getDoubleData(line_poly_info, 'roadLinesPolynomsArray[{}]/c0'.format(get_right_line_id(line_info)))
                 # Process_OutputLevel("left_c0 = {}".format(left_c0), 4)
                 # Process_OutputLevel("right_c0 = {}".format(right_c0), 4)
                 MyCar.speed = vehicle_speed
                 MyCar.cao = vehicle_heading
                 MyCar.yr = vehicle_roll_speed
-                MyCar.positionnow =  left_c0 + right_c0
+
+                x = MyCar.lanefuture
+                left_temp = left_line_coefficient[0] + left_line_coefficient[1]*x + left_line_coefficient[2]*x*x + left_line_coefficient[3]*x*x*x
+                right_temp = right_line_coefficient[0] + right_line_coefficient[1]*x + right_line_coefficient[2]*x*x + right_line_coefficient[3]*x*x*x
                 # Process_OutputLevel("position now = {}".format(MyCar.positionnow), 4)
+                MyCar.positionnow =  left_temp + right_temp
                 
                 # 有限3种状态任务
                 Process_OutputLevel("Current state: " + MyCar.cardecision, 4)
@@ -307,7 +312,6 @@ def main():
                     Com_setDoubleData(cab_interface,'AcceleratorMultiplicative',0)
                     # Com_setShortData(CabToModel, 'IgnitionKey', 2)
                     # Com_setShortData(CabToModel, 'GearBoxAutoMode', 10)
-
                     Com_setDoubleData(steer_control, VAR_Steer, controller.latPid.steer_)
                     # Process_OutputLevel("controller.latPid.steer_ = {}".format(controller.latPid.steer_), 4)
                     Com_setDoubleData(CabToModel, 'Brake', controller.speedPid.brake_)
