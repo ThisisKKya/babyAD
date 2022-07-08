@@ -36,7 +36,7 @@ def run(distanceData, MyCar):
     distance = [distance_left, distance_mid, distance_right]
     
     # 超过所有车后行驶在中间车道
-    if MyCar.speed > 90 and MyCar.cardecision == 'speedup' and not MyCar.finalflag:
+    if MyCar.speed > 30 and MyCar.cardecision == 'speedup' and not MyCar.finalflag:
         MyCar.cardecision = 'overtake'
         MyCar.direction = 'left'
         MyCar.finalflag = True
@@ -60,9 +60,8 @@ def run(distanceData, MyCar):
     # stage 2
     # find target lane
     if(MyCar.cardecision == 'speedup'
-            and distance_mid < MyCar.saftydistance # 13m
+            and distance_mid < MyCar.saftydistance
             and not MyCar.changing  # 保证超车只判断一次即可
-            # and MyCar.speed < 43
             ):  # follow 已将车速降下来
 
         # 超车完成后会自动回复到follow状态

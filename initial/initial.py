@@ -39,15 +39,15 @@ class ControlData(object):
         self.overtakelimit = 25              # 超车阶段控制速度
         
         # 横向控制PID参数
-        self.lat_kp = 0.1
-        self.lat_ki = 0.02
-        self.lat_kd = 0.4
+        self.lat_kp = 0.6
+        self.lat_ki = 0.2
+        self.lat_kd = 0.8
         self.latPid = pid.PID(self.lat_kp, self.lat_ki, self.lat_kd)
         
         # 方向角控制PID参数
-        self.yr_kp = 0.37
+        self.yr_kp = 0.8
         self.yr_ki = 0.024
-        self.yr_kd = 0.032
+        self.yr_kd = 0.1
         self.yrPid = pid.PID(self.yr_kp, self.yr_ki, self.yr_kd)
         
         # 纵向控制PID参数
@@ -74,6 +74,7 @@ class CarState(object):
     
     def __init__(self):
         self.lanestate = LaneState(7, 0, -8) # 左中右车道线目标位置
+        # self.lanestate = LaneState(-7.5, 0, 7.5)
         self.speed = 0                       # 车辆当前速度
         self.cao = 0                         # 车辆当前姿态
         self.yr = 0                          # 车辆当前角速度

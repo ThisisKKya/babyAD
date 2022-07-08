@@ -4,6 +4,7 @@ from scaner import *
 import perception.perception as perception
 from initial.initial import *
 import planning.decision as planning
+import scaner
 # import control
 #global
 distanceData = perception.DistanceData()
@@ -168,6 +169,24 @@ def get_right_distance(target_traffic_info, target_info):
     Process_OutputLevel("right_distance = {}".format(right_distance), 4)
     return right_distance
 
+def get_overtake_target_scaner_id(target_traffic_info, target_info):
+    next_vehicle_in_lane_index = Com_getShortData(target_traffic_info, "nextVehicleInLane")
+    if next_vehicle_in_lane_index != -1:
+        # Process_OutputLevel("next_vehicle_in_lane_index = " + str(next_vehicle_in_lane_index), 4)
+        # 计算被超对象ScanerId
+        scaner_id = Com_getShortData(target_info, "targetsArray[{}]/scanerId".format(next_vehicle_in_lane_index))
+        # Process_OutputLevel("mid_distance = {}".format(mid_distance), 4)
+        return scaner_id
+    return -1
+
+def get_overtake_target_distance(target_info, scaner_id):
+    target_array_count = Com_getShortData(target_info, "targetsArrayCount")
+    for i in range(target_array_count):
+        temp_id = Com_getShortData(target_info, "targetsArray[{}]/scanerId".format(i))
+        if temp_id == scaner_id:
+            return Com_getDoubleData(target_info, "targetsArray[{}]/posXInChosenRef".format(i))
+    return 15
+
 def main():
     #######初始化进程########
     parser = ScanerApiOption()
@@ -209,9 +228,12 @@ def main():
             # Process manager State
             old_status = status
             status = Process_GetState()
+
             # Scaner API is now running
             if status == PS_RUNNING:
                 Com_updateInputs(UT_AllData)
+
+                Process_OutputLevel("-"*30, 4)
                 # 计算左中右车道障碍物距离
                 mid_distance = get_mid_distance(target_traffic_info, target_info)
                 left_distance = get_left_distance(target_traffic_info, target_info)
@@ -253,9 +275,11 @@ def main():
                 # 有限3种状态任务
                 Process_OutputLevel("Current state: " + MyCar.cardecision, 4)
                 Process_OutputLevel("direction: {}".format(MyCar.direction), 4)
-                Process_OutputLevel("MyCar.lanestate = ({}, {}, {})".format(MyCar.lanestate.LEFT, MyCar.lanestate.MID, MyCar.lanestate.RIGHT), 4)
+                Process_OutputLevel("MyCar.changing = {}".format(MyCar.changing) ,4)
+                # Process_OutputLevel("MyCar.lanestate = ({}, {}, {})".format(MyCar.lanestate.LEFT, MyCar.lanestate.MID, MyCar.lanestate.RIGHT), 4)
                 # Com_setDoubleData(cab_interface,VAR_Accelerator,1)
                 # Com_setDoubleData(cab_interface,'AcceleratorMultiplicative', 0)
+                Process_OutputLevel("midlane = {}".format(MyCar.midlane), 4)
                 if (MyCar.cardecision == 'overtake'):
                     controller.speedPid.setSetpoint(controller.overtakelimit)
                     # 纵向控制 thorro_ and brake_
@@ -271,34 +295,38 @@ def main():
                         controller.latPid.setSetpoint(MyCar.midlane)
                         # 更新中线state 进入超车
                         MyCar.changing = True
+                        scaner_id = get_overtake_target_scaner_id(target_traffic_info, target_info)
+                    # Process_OutputLevel("MyCar.changing2 = {}".format(MyCar.changing) ,4)
                     # overtake 完成 切换 follow 状态跟车
                     # print("minus : ", MyCar.midlane - MyCar.positionnow)
                     # if (MyCar.changing and abs(MyCar.midlane - MyCar.positionnow) < 0.5):
-                    if (MyCar.changing and 
-                        (distanceData.distance_mid > 20
-                        or abs(MyCar.midlane - MyCar.positionnow) < 0.5)
-                        ):
+                    
+                    # if (MyCar.changing and 
+                    #     (distanceData.distance_mid > MyCar.saftydistance + 5
+                    #     or abs(MyCar.midlane - MyCar.positionnow) < 0.5)
+                    #     ):
+                    overtake_target_distance = get_overtake_target_distance(target_info, scaner_id)
+                    Process_OutputLevel("overtake_target_distance = {}".format(overtake_target_distance), 4)
+                    if (overtake_target_distance <= 5):
                         MyCar.cardecision = 'speedup'
                         MyCar.direction = 'mid'
                         MyCar.changing = False
                         MyCar.overtakeSum += 1
-
+                    # Process_OutputLevel("MyCar.changing3 = {}".format(MyCar.changing) ,4)
                     # 横向控制 steer_ 加入角度速度约束
                     latitudeyrControlpos(MyCar.yr, controller.yrPid)
                     # print('yr is', MyCar.yr, 'steeryr is', Controller.yrPid.yrsteer_) # overtake >15 , normal < 3
                     # print('latsteer is ', Controller.latPid.steer_)
                     latitudeControlpos(MyCar.positionnow, controller.latPid, MyCar)
 
-                    Com_setDoubleData(cab_interface,VAR_Accelerator,controller.speedPid.thorro_)
+                    Com_setDoubleData(cab_interface, VAR_Accelerator,controller.speedPid.thorro_)
                     # Com_setDoubleData(cab_interface,VAR_Accelerator,20)
                     # Com_setDoubleData(cab_interface,VAR_Accelerator,0)
-                    Com_setDoubleData(steer_control,VAR_Steer,controller.latPid.steer_ + 0.01 * controller.yrPid.yrsteer_)
-                    Com_setShortData(CabToModel, 'IgnitionKey', 2)
-                    Com_setShortData(CabToModel, 'GearBoxAutoMode', 10)
+                    Com_setDoubleData(steer_control, VAR_Steer,controller.latPid.steer_ + 0.01 * controller.yrPid.yrsteer_)
+                    # Com_setShortData(CabToModel, 'IgnitionKey', 2)
+                    # Com_setShortData(CabToModel, 'GearBoxAutoMode', 10)
                     Com_setDoubleData(CabToModel,'Brake',controller.speedPid.brake_)
-                    # ADCPlatform.control(Controller.speedPid.thorro_,
-                    #                     Controller.latPid.steer_ + 0.01 * Controller.yrPid.yrsteer_,
-                    #                     Controller.speedPid.brake_, 1)
+
                 elif (MyCar.cardecision == 'speedup'):
                     if MyCar.time >= controller.superspeeduplimittime \
                         and MyCar.overtakeSum != 0:
